@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TorneApp - Inicio</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes_paises.css"> <script src="script.js" defer></script>
+    <script type="module" src="firebase_auth.js" defer></script> <script type="module" src="firebase_db.js" defer></script> </head>
+<body>
+
+    <div class="main-container">
+        <h1 class="welcome-text">Bienvenido a TorneApp, la app para administrar torneos de juegos moviles</h1>
+
+        <div class="card">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('crear')">Crear sala</button>
+                <button class="tab-btn" onclick="switchTab('unirse')">Unirse a Sala</button>
+            </div>
+
+            <div id="crear-sala" class="tab-content active-content">
+                <form id="form-crear" onsubmit="event.preventDefault();">
+                    <div class="input-group">
+                        <label>Usuario Temporal</label>
+                        <input type="text" id="crear-username" placeholder="Crea un username" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="crear-password" placeholder="Crea una contraseña" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Moneda / País</label>
+                        <select id="crear-pais" required>
+                            <option value="" disabled selected>Elije un país...</option>
+                            <option value="mxn">México (MXN)</option>
+                            <option value="cop">Colombia (COP)</option>
+                            <option value="ars">Argentina (ARS)</option>
+                            <option value="clp">Chile (CLP)</option>
+                            <option value="ves">Venezuela (VES)</option>
+                            <option value="pen">Perú (PEN)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Crear sala</button>
+                </form>
+            </div>
+
+            <div id="unirse-sala" class="tab-content">
+                <form id="form-unirse" onsubmit="event.preventDefault();">
+                    <div class="input-group">
+                        <label>Usuario Temporal</label>
+                        <input type="text" id="unirse-username" placeholder="Crea un username" required>
+                    </div>
+                    <div class="input-group">
+                        <label>ID de la Sala</label>
+                        <input type="text" id="unirse-id" placeholder="ID de la sala" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="unirse-password" placeholder="Contraseña de la sala" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Unirse a sala</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <button id="theme-toggle" class="theme-btn">🌙</button>
+
+</body>
+</html>
+
