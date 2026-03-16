@@ -1,175 +1,174 @@
-/* =========================================
-   VARIABLES DE COLOR (Azul Claro y Oscuro)
-   ========================================= */
 :root {
-    --bg-color: #f0f4f8;
-    --card-bg: #ffffff;
-    --text-color: #1e293b;
-    --text-muted: #64748b;
-    --primary: #0284c7; /* Azul Principal */
-    --primary-dark: #0369a1;
-    --accent: #38bdf8;
-    --danger: #ef4444;
-    --success: #10b981;
-    --border: #e2e8f0;
+    --primary: #007bff;
+    --primary-dark: #0056b3;
+    --bg: #f8faff;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-light: #6c757d;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 [data-theme="dark"] {
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --primary: #38bdf8;
-    --primary-dark: #0ea5e9;
-    --border: #334155;
+    --bg: #0b0e14;
+    --card: #161b22;
+    --text: #f0f6fc;
+    --text-light: #8b949e;
+    --primary: #58a6ff;
 }
 
-/* =========================================
-   RESETEO ANTI-ZOOM
-   ========================================= */
+/* RESET TOTAL PARA EVITAR ZOOM */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Evita que el padding ensanche los elementos */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
     width: 100%;
-    max-width: 100%;
-    overflow-x: hidden; /* Prohibido el movimiento lateral */
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    height: 100%;
+    overflow-x: hidden; /* Prohíbe el scroll horizontal */
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* =========================================
-   CONTENEDOR PRINCIPAL
-   ========================================= */
-.panel-container {
+.app-wrapper {
     width: 100%;
-    max-width: 600px; /* Tamaño ideal para móvil y tablet */
-    margin: 0 auto;
-    padding: 15px;
+    max-width: 100%;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
-/* Encabezado */
-.panel-header {
+/* HEADER */
+.main-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--border);
+    padding: 8px 0;
 }
 
-.panel-header h1 {
-    font-size: 1.4rem;
+.main-header h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
     color: var(--primary);
 }
 
-.badge {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: var(--border);
-    color: var(--text-muted);
+.status-dot {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    background: rgba(0,123,255,0.1);
+    border-radius: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
-/* =========================================
-   TARJETAS DE INFORMACIÓN
-   ========================================= */
-.room-info-card, .admin-section, .tournament-content, .matches-section {
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.2rem;
+    cursor: pointer;
 }
 
-.info-item {
+/* STATS CARDS */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.stat-card {
+    background: var(--card);
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label { font-size: 0.75rem; color: var(--text-light); }
+.stat-value { font-weight: bold; font-size: 0.9rem; margin-top: 4px; }
+
+/* SECCIONES */
+.content-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.content-section h2 {
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+/* LISTA DE JUGADORES (Tarjetas en vez de tabla) */
+.players-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-row {
+    background: var(--card);
+    padding: 12px 16px;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    align-items: center;
+    box-shadow: var(--shadow);
 }
 
-.label { font-weight: 600; color: var(--text-muted); }
-.value { font-family: monospace; font-weight: bold; color: var(--primary); }
-
-/* =========================================
-   TABLAS (CON SCROLL LATERAL SEGURO)
-   ========================================= */
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto; /* Permite deslizar la tabla si es muy ancha */
-    -webkit-overflow-scrolling: touch;
-    margin-top: 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 400px; /* Asegura que no se amontone el texto */
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-}
-
-th {
-    background-color: var(--bg-color);
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-}
-
-/* =========================================
-   BOTONES
-   ========================================= */
-.btn-primary, .btn-secondary, .btn-action {
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s;
-}
-
-.btn-secondary { background: var(--border); color: var(--text-color); }
-.btn-action { background: var(--primary); color: white; width: 100%; margin-bottom: 10px; }
-.btn-start { background: var(--success); }
-.btn-danger { background: var(--danger); }
-
-button:active { transform: scale(0.96); }
-
-/* =========================================
-   BOTÓN TEMA FLOTANTE
-   ========================================= */
-.theme-btn-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 45px;
-    height: 45px;
+.rank-circle {
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: white;
     border-radius: 50%;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    cursor: pointer;
-    font-size: 1.2rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 0.7rem;
+    font-weight: bold;
 }
 
-/* Mensaje vacío */
-.empty-msg {
-    text-align: center;
-    color: var(--text-muted);
-    padding: 20px;
-    font-style: italic;
+/* BOTONES */
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.btn-main, .btn-start {
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-main { background: var(--primary); }
+.btn-start { background: #28a745; }
+
+/* FAB TEMA */
+.theme-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 1.2rem;
 }
