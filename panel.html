@@ -3,74 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TorneApp - Panel de Control</title>
-    
+    <title>TorneApp - Panel</title>
     <link rel="stylesheet" href="panel.css">
-    
     <script src="panel.js" defer></script>
 </head>
 <body>
 
-    <div class="panel-container">
-        <header class="panel-header">
-            <div class="header-info">
-                <h1 id="panel-title">Panel de Torneo</h1>
-                <span id="status-badge" class="badge">Cargando...</span>
+    <div class="app-wrapper">
+        <header class="main-header">
+            <div class="logo-area">
+                <h1>TorneApp</h1>
+                <span id="status-badge" class="status-dot">Modo Demo</span>
             </div>
-            <button id="exit-btn" class="btn-secondary">Salir</button>
+            <button id="exit-btn" class="icon-btn">✕</button>
         </header>
 
-        <section class="room-info-card">
-            <div class="info-item">
-                <span class="label">ID de Sala:</span>
-                <span id="display-room-id" class="value">--------</span>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Sala ID</span>
+                <span id="display-room-id" class="stat-value">---</span>
             </div>
-            <div class="info-item">
-                <span class="label">Rol:</span>
-                <span id="display-role" class="value">--------</span>
+            <div class="stat-card">
+                <span class="stat-label">Mi Rol</span>
+                <span id="display-role" class="stat-value">---</span>
+            </div>
+        </div>
+
+        <section id="admin-controls" class="admin-panel" style="display: none;">
+            <div class="admin-header">
+                <h2>Gestión</h2>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-main" onclick="abrirModalJugador()">+ Jugador</button>
+                <button class="btn-start" onclick="iniciarTorneo()">Iniciar</button>
             </div>
         </section>
 
-        <section id="admin-controls" class="admin-section" style="display: none;">
-            <h3>Gestión de Torneo</h3>
-            <div class="admin-actions">
-                <button class="btn-action" onclick="abrirModalJugador()">Añadir Jugador</button>
-                <button class="btn-action btn-start" onclick="iniciarTorneo()">Iniciar Torneo</button>
-                <button class="btn-action btn-danger" onclick="finalizarTorneo()">Finalizar</button>
-            </div>
-        </section>
-
-        <section class="tournament-content">
-            <div class="content-header">
+        <section class="content-section">
+            <div class="section-header">
                 <h2>Participantes</h2>
-                <span id="player-count">0/0</span>
+                <span id="player-count" class="count-pill">0</span>
             </div>
-            
-            <div class="table-wrapper">
-                <table id="players-table">
-                    <thead>
-                        <tr>
-                            <th>Pos</th>
-                            <th>Jugador</th>
-                            <th>Puntos</th>
-                            <th class="admin-only">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="players-list">
-                        </tbody>
-                </table>
+            <div id="players-list" class="players-column">
+                <p class="empty-msg">Cargando jugadores...</p>
             </div>
         </section>
 
-        <section class="matches-section">
-            <h2>Próximos Encuentros</h2>
-            <div id="matches-container" class="matches-grid">
-                <p class="empty-msg">Esperando inicio del torneo...</p>
+        <section class="content-section">
+            <h2>Duelos Actuales</h2>
+            <div id="matches-container" class="matches-list">
+                <p class="empty-msg">Esperando emparejamientos...</p>
             </div>
         </section>
     </div>
 
-    <button id="theme-toggle" class="theme-btn-float">🌙</button>
+    <button id="theme-toggle" class="theme-fab">🌙</button>
 
 </body>
 </html>
