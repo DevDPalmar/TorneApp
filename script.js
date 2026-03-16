@@ -1,10 +1,8 @@
-// Función para cambiar entre las pestañas (Crear Sala / Unirse a Sala)
+// --- LÓGICA DE PESTAÑAS ---
 function switchTab(tab) {
-    // Quitar clase activa de todos los botones y contenidos
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
 
-    // Añadir clase activa al seleccionado
     if(tab === 'crear') {
         document.querySelectorAll('.tab-btn')[0].classList.add('active');
         document.getElementById('crear-sala').classList.add('active-content');
@@ -14,17 +12,57 @@ function switchTab(tab) {
     }
 }
 
-// Lógica para el botón de Modo Claro / Oscuro
+// --- MODO OSCURO / CLARO ---
 const themeToggleBtn = document.getElementById('theme-toggle');
 
+// Cargar tema guardado
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.setAttribute('data-theme', 'dark');
+    themeToggleBtn.textContent = '☀️';
+}
+
 themeToggleBtn.addEventListener('click', () => {
-    // Verifica si el body tiene el atributo de tema oscuro
     if (document.body.getAttribute('data-theme') === 'dark') {
         document.body.removeAttribute('data-theme');
-        themeToggleBtn.textContent = '🌙'; // Cambia el icono a luna
+        localStorage.setItem('theme', 'light');
+        themeToggleBtn.textContent = '🌙'; 
     } else {
         document.body.setAttribute('data-theme', 'dark');
-        themeToggleBtn.textContent = '☀️'; // Cambia el icono a sol
+        localStorage.setItem('theme', 'dark');
+        themeToggleBtn.textContent = '☀️'; 
     }
 });
 
+// --- EL MODO DEMO (5 CLICS EN EL LOGO) ---
+let clickCount = 0;
+let clickTimer;
+
+document.getElementById('logo-title').addEventListener('click', () => {
+    clickCount++;
+    clearTimeout(clickTimer);
+    
+    // Si no haces los 5 clics en 2 segundos, se reinicia
+    clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+
+    if (clickCount >= 5) {
+        clickCount = 0;
+        localStorage.setItem('torneapp_demo', 'true');
+        localStorage.setItem('torneapp_role', 'owner'); // Entras como dueño por defecto
+        window.location.href = 'panel.html';
+    }
+});
+
+// --- REDIRECCIÓN NORMAL ---
+document.getElementById('form-crear').addEventListener('submit', function(event) {
+    event.preventDefault();
+    localStorage.removeItem('torneapp_demo');
+    localStorage.setItem('torneapp_role', 'owner');
+    window.location.href = 'panel.html';
+});
+
+document.getElementById('form-unirse').addEventListener('submit', function(event) {
+    event.preventDefault();
+    localStorage.removeItem('torneapp_demo');
+    localStorage.setItem('torneapp_role', 'viewer'); // Por defecto entran como vista
+    window.location.href = 'panel.html';
+});
