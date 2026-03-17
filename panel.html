@@ -31,8 +31,8 @@
                 <h2>1. Cambio de Moneda</h2>
             </div>
             <div class="input-group">
-                <label>Valor del Dólar ($) en tu moneda local:</label>
-                <input type="number" id="valor-dolar" placeholder="Ej: 45.50" step="0.01">
+                <label>Tasa de cambio actual:</label>
+                <input type="number" id="valor-dolar" placeholder="Valor de 1 Dólar en moneda local" step="0.01">
             </div>
         </section>
 
@@ -44,7 +44,7 @@
             <div class="input-group flex-row">
                 <div class="flex-half">
                     <label>Entrada ($ USD):</label>
-                    <input type="number" id="costo-entrada" placeholder="Ej: 5" step="0.5">
+                    <input type="number" id="costo-entrada" placeholder="Costo de la entrada en $ USD" step="0.5">
                 </div>
                 <div class="flex-half result-box">
                     <label>Total Local:</label>
@@ -66,8 +66,8 @@
 
             <div class="input-group flex-row mt-10" id="caja-premio-kill">
                 <div class="flex-half">
-                    <label>Premio por Kill ($):</label>
-                    <input type="number" id="premio-kill" placeholder="Ej: 1" step="0.5">
+                    <label>Premio por Kill ($ USD):</label>
+                    <input type="number" id="premio-kill" placeholder="Monto a pagar por cada kill en $ USD" step="0.5">
                 </div>
                 <div class="flex-half result-box">
                     <label>Equivalente:</label>
@@ -80,9 +80,16 @@
             <div class="panel-header">
                 <h2>3. Registro de Jugadores</h2>
             </div>
+            
             <div id="registro-container" class="registro-list">
-                <p class="empty-msg">Configura el torneo arriba para empezar a registrar.</p>
+                <div class="input-group flex-row player-row" id="player-row-inicial">
+                    <input type="text" placeholder="Nombre del jugador" style="flex: 2;">
+                    <input type="color" value="#0284c7" style="flex: 0.5; height: 42px; padding: 0;">
+                    <input type="number" placeholder="Cant. Kills" style="flex: 1;">
+                    <button class="btn-danger btn-del" style="padding: 10px; border: none; border-radius: 8px;">🗑️</button>
+                </div>
             </div>
+            
             <button id="btn-add-player" class="btn-primary mt-10">+ Añadir Participante</button>
         </section>
 
@@ -111,7 +118,10 @@
 
     </div>
 
-    <button id="theme-toggle" class="theme-fab">🌙</button>
+    <div class="fab-container">
+        <button id="demo-menu-btn" class="theme-fab demo-fab">🛠️</button>
+        <button id="theme-toggle" class="theme-fab">🌙</button>
+    </div>
 
 </body>
 </html>
