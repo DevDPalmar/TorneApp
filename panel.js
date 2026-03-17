@@ -4,232 +4,235 @@
 let estadoSala = {
     tasaCambio: 0,
     costoEntradaUsd: 0,
-    modoEquipo: 'individual', // 'individual' o 'duos'
-    modoVictoria: 'kills',    // 'kills' o 'posicion'
+    modoEquipo: 'individual', 
+    modoVictoria: 'kills',    
     premioKillUsd: 0,
-    jugadores: []
+    rolActual: 'admin' // Puede ser 'admin' o 'espectador'
 };
 
 // ==========================================
-// 1. INICIALIZACIÓN AL CARGAR LA PÁGINA
+// 1. INICIALIZACIÓN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Sincronizar Tema (Oscuro/Claro)
     configurarTema();
 
-    // Comprobar si entramos por el "Botón Secreto" (Modo Demo)
+    // Comprobar si es Demo
     const isDemo = localStorage.getItem('torneapp_demo') === 'true';
     if (isDemo) {
-        document.getElementById('display-id').textContent = 'ID: DEMO';
+        document.getElementById('display-id').textContent = 'ID: DEMO-2026';
         document.getElementById('display-pass').textContent = '🔑: Sin PIN';
     }
 
-    // Inicializar los listeners (los oídos del programa)
     configurarListenersEconomia();
     configurarListenersModos();
     configurarBotonesPrincipales();
+    configurarMenuDemo();
+
+    // Asegurar que siempre haya 1 persona (El Admin)
+    actualizarContadorUsuarios(1);
+    
+    // Inyectar la primera fila inicial de forma correcta
+    renderizarFilas(); 
 });
 
 // ==========================================
-// 2. LÓGICA DE ECONOMÍA (PANEL 1 Y 2)
+// 2. LÓGICA DE ECONOMÍA
 // ==========================================
 function configurarListenersEconomia() {
-    const inputDolar = document.getElementById('valor-dolar');
-    const inputEntrada = document.getElementById('costo-entrada');
-    const inputPremioKill = document.getElementById('premio-kill');
-
-    // Cuando escribes el valor del dólar
-    inputDolar.addEventListener('input', (e) => {
-        estadoSala.tasaCambio = parseFloat(e.target.value) || 0;
-        actualizarCalculos();
-    });
-
-    // Cuando escribes el costo de entrada
-    inputEntrada.addEventListener('input', (e) => {
-        estadoSala.costoEntradaUsd = parseFloat(e.target.value) || 0;
-        actualizarCalculos();
-    });
-
-    // Cuando escribes el premio por Kill
-    inputPremioKill.addEventListener('input', (e) => {
-        estadoSala.premioKillUsd = parseFloat(e.target.value) || 0;
-        actualizarCalculos();
+    ['valor-dolar', 'costo-entrada', 'premio-kill'].forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+            if(id === 'valor-dolar') estadoSala.tasaCambio = parseFloat(e.target.value) || 0;
+            if(id === 'costo-entrada') estadoSala.costoEntradaUsd = parseFloat(e.target.value) || 0;
+            if(id === 'premio-kill') estadoSala.premioKillUsd = parseFloat(e.target.value) || 0;
+            actualizarCalculos();
+        });
     });
 }
 
-// Función maestra que actualiza todos los números en pantalla
 function actualizarCalculos() {
-    const totalLocalEntrada = estadoSala.costoEntradaUsd * estadoSala.tasaCambio;
-    const totalLocalKill = estadoSala.premioKillUsd * estadoSala.tasaCambio;
-
-    document.getElementById('entrada-local').textContent = totalLocalEntrada.toFixed(2);
-    document.getElementById('kill-local').textContent = totalLocalKill.toFixed(2);
-    
+    document.getElementById('entrada-local').textContent = (estadoSala.costoEntradaUsd * estadoSala.tasaCambio).toFixed(2);
+    document.getElementById('kill-local').textContent = (estadoSala.premioKillUsd * estadoSala.tasaCambio).toFixed(2);
     actualizarFinanzasTotales();
 }
 
 // ==========================================
-// 3. LÓGICA DE MODOS DE JUEGO (PANEL 2)
+// 3. LÓGICA DE MODOS DE JUEGO
 // ==========================================
 function configurarListenersModos() {
-    const botonesEquipo = document.querySelectorAll('#toggle-equipo .toggle-btn');
-    const botonesVictoria = document.querySelectorAll('#toggle-victoria .toggle-btn');
+    const btnEquipo = document.querySelectorAll('#toggle-equipo .toggle-btn');
+    const btnVictoria = document.querySelectorAll('#toggle-victoria .toggle-btn');
     const cajaPremioKill = document.getElementById('caja-premio-kill');
 
-    // Cambiar entre Individual / Dúos
-    botonesEquipo.forEach(btn => {
+    btnEquipo.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            botonesEquipo.forEach(b => b.classList.remove('active'));
+            btnEquipo.forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             estadoSala.modoEquipo = e.target.getAttribute('data-val');
-            limpiarListaJugadores(); // Si cambias el modo, se limpia la lista
+            renderizarFilas(true); // Reinicia la lista con el nuevo formato
         });
     });
 
-    // Cambiar entre Kills / Posición
-    botonesVictoria.forEach(btn => {
+    btnVictoria.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            botonesVictoria.forEach(b => b.classList.remove('active'));
+            btnVictoria.forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             estadoSala.modoVictoria = e.target.getAttribute('data-val');
             
-            // Mostrar u ocultar el campo de "Premio por Kill"
             if (estadoSala.modoVictoria === 'kills') {
                 cajaPremioKill.style.display = 'flex';
             } else {
                 cajaPremioKill.style.display = 'none';
-                estadoSala.premioKillUsd = 0; // Resetear el premio
+                estadoSala.premioKillUsd = 0;
                 document.getElementById('premio-kill').value = '';
                 actualizarCalculos();
             }
-            limpiarListaJugadores();
+            renderizarFilas(true); 
         });
     });
 }
 
 // ==========================================
-// 4. REGISTRO DINÁMICO (PANEL 3)
+// 4. REGISTRO DINÁMICO Y PRE-CARGADO
 // ==========================================
-function configurarBotonesPrincipales() {
-    const btnAddPlayer = document.getElementById('btn-add-player');
-    const containerRegistro = document.getElementById('registro-container');
+function renderizarFilas(reset = false) {
+    const container = document.getElementById('registro-container');
+    if (reset) container.innerHTML = ''; 
 
-    btnAddPlayer.addEventListener('click', () => {
-        // Quitar el mensaje de vacío si existe
-        const emptyMsg = containerRegistro.querySelector('.empty-msg');
-        if (emptyMsg) emptyMsg.remove();
+    // Si está vacío, inyectamos una fila por defecto
+    if (container.children.length === 0) {
+        agregarFilaJugador();
+    }
+}
 
-        const idUnico = Date.now(); // ID temporal para el modo offline
-        const nuevaFila = document.createElement('div');
-        nuevaFila.classList.add('input-group', 'flex-row');
-        nuevaFila.id = `player-row-${idUnico}`;
+function agregarFilaJugador() {
+    const container = document.getElementById('registro-container');
+    const idUnico = Date.now();
+    const div = document.createElement('div');
+    div.classList.add('input-group', 'flex-row', 'player-row');
+    div.id = `player-row-${idUnico}`;
 
-        // Lógica: Crear los campos según lo que se eligió arriba
-        let htmlCampos = '';
+    let html = '';
 
-        if (estadoSala.modoEquipo === 'individual') {
-            htmlCampos += `<input type="text" placeholder="Nombre" style="flex: 2;">`;
-            htmlCampos += `<input type="color" value="#0284c7" style="flex: 0.5; height: 42px; padding: 0;">`;
-            
-            if (estadoSala.modoVictoria === 'kills') {
-                htmlCampos += `<input type="number" placeholder="Kills" style="flex: 1;" onchange="actualizarFinanzasTotales()">`;
-            } else {
-                htmlCampos += `<input type="number" placeholder="Posición (1,2...)" style="flex: 1;">`;
-            }
+    // INDIVIDUAL
+    if (estadoSala.modoEquipo === 'individual') {
+        html += `<input type="text" placeholder="Nombre del jugador" style="flex: 2;">
+                 <input type="color" value="#0284c7" style="flex: 0.5; height: 42px; padding: 0;">`;
+        if (estadoSala.modoVictoria === 'kills') {
+            html += `<input type="number" placeholder="Cant. Kills" class="calc-kill" style="flex: 1;">`;
         } else {
-            // Modo Dúos
-            htmlCampos += `
-                <div style="flex: 3; display: flex; flex-direction: column; gap: 5px;">
-                    <input type="text" placeholder="Nombre Jugador 1">
-                    <input type="text" placeholder="Nombre Jugador 2">
-                </div>
-                <input type="color" value="#0284c7" style="flex: 0.5; height: auto; padding: 0;">
-            `;
-            
-            if (estadoSala.modoVictoria === 'kills') {
-                htmlCampos += `
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
-                        <input type="number" placeholder="Kills J1" onchange="actualizarFinanzasTotales()">
-                        <input type="number" placeholder="Kills J2" onchange="actualizarFinanzasTotales()">
-                    </div>
-                `;
-            } else {
-                htmlCampos += `<input type="number" placeholder="Posición (1,2...)" style="flex: 1; align-self: center;">`;
-            }
+            // Posición (Incluye campo de premio en USD)
+            html += `<input type="number" placeholder="Lugar (1°, 2°)" style="flex: 1;">
+                     <input type="number" placeholder="Premio Ganado ($ USD)" class="calc-premio" style="flex: 1.5;">`;
         }
+    } 
+    // DÚOS
+    else {
+        html += `<div style="flex: 3; display: flex; flex-direction: column; gap: 5px;">
+                    <input type="text" placeholder="Jugador 1">
+                    <input type="text" placeholder="Jugador 2">
+                 </div>
+                 <input type="color" value="#0284c7" style="flex: 0.5; height: auto; padding: 0;">`;
+        if (estadoSala.modoVictoria === 'kills') {
+            html += `<div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
+                        <input type="number" placeholder="Kills J1" class="calc-kill">
+                        <input type="number" placeholder="Kills J2" class="calc-kill">
+                     </div>`;
+        } else {
+            html += `<div style="flex: 1.5; display: flex; flex-direction: column; gap: 5px;">
+                        <input type="number" placeholder="Lugar del Dúo">
+                        <input type="number" placeholder="Premio ($ USD)" class="calc-premio">
+                     </div>`;
+        }
+    }
 
-        // Botón de eliminar
-        htmlCampos += `
-            <button onclick="eliminarFila(${idUnico})" class="btn-danger" style="padding: 10px; border: none; border-radius: 8px; cursor: pointer;">
-                🗑️
-            </button>
-        `;
+    html += `<button class="btn-danger btn-del" onclick="eliminarFila(${idUnico})" style="padding: 10px; border: none; border-radius: 8px;">🗑️</button>`;
+    
+    div.innerHTML = html;
+    container.appendChild(div);
 
-        nuevaFila.innerHTML = htmlCampos;
-        containerRegistro.appendChild(nuevaFila);
-        
-        // Aumentar el contador de personas en la barra superior
-        actualizarContadorUsuarios();
+    // Añadir listeners a los nuevos inputs para actualizar finanzas en tiempo real
+    div.querySelectorAll('.calc-kill, .calc-premio').forEach(input => {
+        input.addEventListener('input', actualizarFinanzasTotales);
     });
 
-    // Botones de la barra superior
-    document.getElementById('btn-reset').addEventListener('click', resetearTodo);
+    actualizarContadorUsuarios();
+    actualizarFinanzasTotales();
+}
+
+function configurarBotonesPrincipales() {
+    document.getElementById('btn-add-player').addEventListener('click', agregarFilaJugador);
+    
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        if(confirm('¿Limpiar todos los paneles y empezar de cero?')){
+            document.querySelectorAll('#panel-economia input, #panel-config input').forEach(i => i.value = '');
+            estadoSala.tasaCambio = 0;
+            estadoSala.costoEntradaUsd = 0;
+            estadoSala.premioKillUsd = 0;
+            actualizarCalculos();
+            renderizarFilas(true); // Reinicia con 1 fila
+        }
+    });
+
     document.getElementById('btn-close').addEventListener('click', () => {
-        if(confirm('¿Seguro que quieres cerrar la sala? Los datos no guardados se perderán.')){
+        if(confirm('¿Seguro que quieres cerrar la sala?')){
             window.location.href = 'index.html';
         }
     });
 }
 
 // ==========================================
-// 5. UTILIDADES Y FINANZAS
+// 5. FINANZAS Y UTILIDADES
 // ==========================================
 window.eliminarFila = function(id) {
-    document.getElementById(`player-row-${id}`).remove();
+    const fila = document.getElementById(`player-row-${id}`);
+    if (fila) fila.remove();
+    
+    // Si borras todas las filas, vuelve a poner una limpia automáticamente
+    const container = document.getElementById('registro-container');
+    if (container.children.length === 0) agregarFilaJugador();
+    
     actualizarContadorUsuarios();
     actualizarFinanzasTotales();
 };
 
-function limpiarListaJugadores() {
-    document.getElementById('registro-container').innerHTML = '<p class="empty-msg">Configura el torneo arriba para empezar a registrar.</p>';
-    actualizarContadorUsuarios();
-}
-
-function actualizarContadorUsuarios() {
-    // Cuenta cuántas filas de jugadores hay (Aproximación para el demo)
-    const count = document.querySelectorAll('[id^="player-row-"]').length;
-    document.getElementById('user-count').textContent = count;
+function actualizarContadorUsuarios(forzarSuma = 0) {
+    const count = document.querySelectorAll('.player-row').length;
+    // Siempre mostrará al menos 1 (el admin) más los registrados
+    const total = count > 0 ? count + forzarSuma : 1; 
+    document.getElementById('user-count').textContent = total;
 }
 
 function actualizarFinanzasTotales() {
-    // Calculamos el dinero bruto que entra (Cantidad de filas * Costo de Entrada)
-    const filasParticipantes = document.querySelectorAll('[id^="player-row-"]').length;
-    
-    // Si es individual cobra 1 entrada por fila, si es dúo cobra 2 (puedes ajustar esta regla)
+    const filas = document.querySelectorAll('.player-row');
     const multiplicador = estadoSala.modoEquipo === 'duos' ? 2 : 1;
-    const totalDolaresBruto = filasParticipantes * multiplicador * estadoSala.costoEntradaUsd;
-    const totalLocalBruto = totalDolaresBruto * estadoSala.tasaCambio;
+    
+    // 1. RECAUDACIÓN BRUTA (Moneda Local)
+    const recaudacionUsd = filas.length * multiplicador * estadoSala.costoEntradaUsd;
+    const recaudacionLocal = recaudacionUsd * estadoSala.tasaCambio;
+    document.getElementById('total-recaudado').textContent = recaudacionLocal.toFixed(2);
 
-    document.getElementById('total-recaudado').textContent = totalLocalBruto.toFixed(2);
-
-    // Aquí irá la lógica más compleja de restar los premios (Ganancia Neta)
-    // Por ahora, en este paso, lo igualamos o hacemos un estimado:
-    document.getElementById('total-ganancia').textContent = totalLocalBruto.toFixed(2); 
-}
-
-function resetearTodo() {
-    if(confirm('¿Limpiar todos los paneles y empezar de cero?')){
-        document.querySelectorAll('input').forEach(input => input.value = '');
-        estadoSala.tasaCambio = 0;
-        estadoSala.costoEntradaUsd = 0;
-        estadoSala.premioKillUsd = 0;
-        actualizarCalculos();
-        limpiarListaJugadores();
+    // 2. GASTOS EN PREMIOS (Moneda Local)
+    let totalPremiosUsd = 0;
+    
+    if (estadoSala.modoVictoria === 'kills') {
+        const inputsKills = document.querySelectorAll('.calc-kill');
+        let totalKills = 0;
+        inputsKills.forEach(input => totalKills += (parseFloat(input.value) || 0));
+        totalPremiosUsd = totalKills * estadoSala.premioKillUsd;
+    } else {
+        const inputsPremios = document.querySelectorAll('.calc-premio');
+        inputsPremios.forEach(input => totalPremiosUsd += (parseFloat(input.value) || 0));
     }
+
+    const totalPremiosLocal = totalPremiosUsd * estadoSala.tasaCambio;
+
+    // 3. GANANCIA NETA
+    const gananciaNeta = recaudacionLocal - totalPremiosLocal;
+    document.getElementById('total-ganancia').textContent = gananciaNeta.toFixed(2);
 }
 
 // ==========================================
-// TEMA OSCURO/CLARO
+// 6. MENÚ DEMO Y TEMAS
 // ==========================================
 function configurarTema() {
     const themeBtn = document.getElementById('theme-toggle');
@@ -239,5 +242,37 @@ function configurarTema() {
         const isDark = document.body.hasAttribute('data-theme');
         isDark ? document.body.removeAttribute('data-theme') : document.body.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    });
+}
+
+function configurarMenuDemo() {
+    const demoBtn = document.getElementById('demo-menu-btn');
+    
+    demoBtn.addEventListener('click', () => {
+        const accion = prompt(
+            "🛠️ MENÚ DEMO - Elige una opción:\n\n" +
+            "1. Cambiar a vista Espectador\n" +
+            "2. Cambiar a vista Admin\n" +
+            "3. Añadir 3 Jugadores Bot\n" +
+            "4. Limpiar caché (Reset total)"
+        );
+
+        if (accion === "1") {
+            estadoSala.rolActual = 'espectador';
+            document.querySelectorAll('.btn-danger, #btn-add-player, #btn-reset, #panel-economia').forEach(el => el.style.display = 'none');
+            alert("Vista Espectador activada. Controles ocultos.");
+        } else if (accion === "2") {
+            estadoSala.rolActual = 'admin';
+            document.querySelectorAll('.btn-danger, #btn-add-player, #btn-reset, #panel-economia').forEach(el => el.style.display = '');
+            alert("Vista Admin restaurada.");
+        } else if (accion === "3") {
+            agregarFilaJugador();
+            agregarFilaJugador();
+            agregarFilaJugador();
+            alert("3 Bots añadidos al registro.");
+        } else if (accion === "4") {
+            localStorage.clear();
+            location.reload();
+        }
     });
 }
